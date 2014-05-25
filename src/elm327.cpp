@@ -1,0 +1,159 @@
+/* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
+/*
+ * openobd
+ * Copyright (C) Simon Booth 2010 <simesb@users.sourceforge.net>
+ *
+ * openobd is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * openobd is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <wx/wxprec.h>
+
+#ifdef __BORLANDC__
+    #pragma hdrstop
+#endif
+
+#ifndef WX_PRECOMP
+    #include <wx/wx.h>
+#endif
+
+#include "elm327.h"
+#include "obdbase.h"
+#include "logPanel.h"
+#include "ctb-0.15/ctb.h"
+
+using namespace std;
+using namespace ctb;
+
+elm327::elm327 (const wxString& serialPort) : obdbase(serialPort)
+{
+	this->obd_init_slow();
+	this->elm_set_echo(false);
+	this->elm_set_headers(false);
+}
+
+/// \brief Request a change of protocol
+///
+/// Ask the ELM device to change the protocol used to communicate with
+/// the ECU.
+///
+/// \return True if the device reports a change.
+bool elm327::obd_set_protocol (int OBDprotocol)
+{
+	bool result = false;
+
+	if (logger) {
+		wxString msg;
+		msg.Printf(_("Asking to change protocol to %02X\n"), OBDprotocol);
+		logger->appendLog(msg, logPanel::LOG_OUT);
+	}
+
+	wxString cmd = wxString::Format(_T("SP %x"), OBDprotocol);
+	wxString response = this->obd_send_AT_command(cmd);
+
+	if (response.CmpNoCase(_T("OK"))) {
+		result = true;
+
+		// preform an init
+		this->obd_init_slow();
+	}
+	return result;
+}
+
+/// \brief Ask the ELM device for its identity
+///
+///
+///
+/// \return A string containing the identity reported by the device
+wxString elm327::obd_identify_device()
+{
+	if (logger) {
+		wxString msg = _("Asking device for identity\n");
+		logger->appendLog(msg, logPanel::LOG_OUT);
+	}
+
+	wxString cmd(_T("I"));
+	return this->obd_send_AT_command (cmd);
+}
+
+wxString elm327::obd_get_protocol()
+{
+	if (logger) {
+		wxString msg = _("Asking device for current protocol\n");
+		logger->appendLog(msg, logPanel::LOG_OUT);
+	}
+
+	wxString cmd(_T("DP"));
+	return this->obd_send_AT_command (cmd);
+}
+
+void elm327::obd_init_slow ()
+{
+	if (logger) {
+		wxString msg = _("Asking device for initialisation (slow)\n");
+		logger->appendLog(msg, logPanel::LOG_OUT);
+	}
+
+	wxString cmd(_T("SI"));
+	this->obd_send_AT_command (cmd);
+}
+
+void elm327::obd_init_fast ()
+{
+	if (logger) {
+		wxString msg = _("Asking device for initialisation (fast)\n");
+		logger->appendLog(msg, logPanel::LOG_OUT);
+	}
+
+	wxString cmd(_T("FI"));
+	this->obd_send_AT_command (cmd);
+}
+
+wxString elm327::obd_send_AT_command (const wxString& command)
+{
+	wxString result;
+	wxString fullCmd;
+
+	// Build the full command
+	fullCmd = _T("AT") + command;
+
+	if (this->obd_write(fullCmd, fullCmd.length())) {
+		result = this->obd_read();
+	} else {
+		result = _("Communication error");
+	}
+
+	return result;
+}
+
+void elm327::elm_set_headers (bool show)
+{
+	wxString msg;
+	if (show) {
+		msg = _T("H1");
+	} else {
+		msg = _T("H0");
+	}
+	obd_send_AT_command(msg);
+}
+
+void elm327::elm_set_echo (bool show)
+{
+	wxString msg;
+	if (show) {
+		msg = _T("E1");
+	} else {
+		msg = _T("E0");
+	}
+	obd_send_AT_command(msg);
+}

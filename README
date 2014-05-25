@@ -1,0 +1,26 @@
+Requirements:
+	CMake
+	wxWidgets (2.8 or higher)
+	sqlite3
+
+To build:
+	Unpack archive and cd to directory.
+	
+	If you are building on WINDOWS, downloads the sqlite amalgamation from 
+http://www.sqlite.org/download.html (currently sqlite-amalgamation-3_7_0.zip)
+and mkdir sqlite.  Extract the source files to this sqlite directory.
+
+	mkdir build
+	cd build
+	cmake ../
+	make
+
+
+
+To use:
+
+Connect to an ELM327 via a serial port.  The MIL Status panel shows any
+error codes which can be reset.  The PID panel show the outputs from the
+ECU for all supported Mode 1 PIDs.
+
+

@@ -1,0 +1,8 @@
+# List of source files containing translatable strings.
+src/main.cpp
+src/gui.cpp
+src/obdFrame.cpp
+src/logPanel.cpp
+src/milPanel.cpp
+src/obdbase.cpp
+src/elm327.cpp
