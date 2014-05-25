@@ -74,7 +74,7 @@ obdbase::~obdbase ()
 
 void obdbase::obd_device_connect (const wxString& SerialPort)
 {
-    int baudrate = 9600;
+    int baudrate = 38400;
 
     // open the serial port
     port->Open(SerialPort.mb_str(wxConvUTF8), baudrate);
