@@ -35,6 +35,10 @@ dlgBaseOptions( parent )
 	devices.Add(_T("COM3"));
 	devices.Add(_T("COM4"));
 #else
+	devices.Add(_T("/dev/ttyUSB0"));
+	devices.Add(_T("/dev/ttyUSB1"));
+	devices.Add(_T("/dev/ttyUSB2"));
+	devices.Add(_T("/dev/ttyUSB3"));
 	devices.Add(_T("/dev/ttyS0"));
 	devices.Add(_T("/dev/ttyS1"));
 	devices.Add(_T("/dev/ttyS2"));
